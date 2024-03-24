@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ca">
+    <head>
+        <meta charset="utf-8">
+        <title>Clau segura</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col"></div>
+                <div class="col-sm-8">
+
+                    <div class="row mt-5">
+                        <div class="col">
+                            <h1 class="text-center">Clau segura</h1>
+                            <p class="text-center">Generador de contrasenyes</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div id="password" class="border rounded text-center font-monospace">Generant...</div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col">
+                            <label id="password-size-label" for="password-size">Mida: 12</label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="range" class="form-range" min="4" max="32" value="12" id="password-size">
+                        </div>
+                        <div class="col"><abbr title="L'entropia d'una contrasenya correspon a la dificultat d'una màquina per encertar-la. Com més alt és el valor, més segura és la contrasenya.">Entropia:</abbr> <span id="entropy"></span></div>
+                    </div>
+                    <div class="row mt-3 form-switch">
+                        <div class="col">
+                            <input class="form-check-input" type="checkbox" value="" id="lower" checked>
+                            <label class="form-check-label" for="lower">
+                                Minúscules
+                            </label>
+                        </div>
+                        <div class="col">
+                            <input class="form-check-input" type="checkbox" value="" id="upper" checked>
+                            <label class="form-check-label" for="upper">
+                                Majúscules
+                            </label>
+                        </div>
+                        <div class="col">
+                            <input class="form-check-input" type="checkbox" value="" id="number" checked>
+                            <label class="form-check-label" for="number">
+                                Números
+                            </label>
+                        </div>
+                        <div class="col">
+                            <input class="form-check-input" type="checkbox" value="" id="special" checked>
+                            <label class="form-check-label" for="special">
+                                Especials
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="mt-2 text-center">
+                                <button id="generate" type="button" class="btn btn-primary">Genera una nova contrasenya</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col"></div>
+
+                <a href="https://github.com/factorialunar/clausegura" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+
+        <script>
+            var diceware_list = null;
+
+            function generateSymbols(has_lower, has_upper, has_number, has_special) {
+                // 26 symbols
+                const lower_symbols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+                // 26 symbols
+                const upper_symbols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+                // 10 symbols
+                const number_symbols = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                // 32 symbols
+                const special_symbols = [
+                    '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
+                    ':', ';', '<', '=', '>', '?',
+                    '@',
+                    '[', '\\', ']', '^', '_',
+                    '`',
+                    '{', '|', '}', '~',
+                ];
+
+                let symbols = new Array();
+
+                if (has_lower) {
+                    symbols.push(...lower_symbols);
+                }
+                if (has_upper) {
+                    symbols.push(...upper_symbols);
+                }
+                if (has_number) {
+                    symbols.push(...number_symbols);
+                }
+                if (has_special) {
+                    symbols.push(...special_symbols);
+                }
+
+                return symbols;
+            }
+
+            async function getEntropyBytes(length) {
+                // Generate 256 bits of entropy
+
+                const AESKeyBits = 256;
+                const AESKeyBytes = AESKeyBits / 8; // 32
+
+                var entropy_bytes = new Array();
+
+                while (entropy_bytes.length < length) {
+                    const key = await window.crypto.subtle.generateKey(
+                        {
+                            name: "AES-GCM",
+                            length: AESKeyBits,
+                        },
+                        true,
+                        ["encrypt", "decrypt"],
+                    );
+                    const exported = await window.crypto.subtle.exportKey("raw", key);
+                    const key_bytes = Array.from(new Uint8Array(exported));
+                    entropy_bytes.push(...key_bytes);
+                }
+
+                return entropy_bytes.slice(0, length);
+            }
+
+            function getPasswordSize() {
+                return parseInt(document.getElementById("password-size").value);
+            }
+
+            async function generateKey() {
+                const length = getPasswordSize();
+                const has_lower = document.getElementById("lower").checked;
+                const has_upper = document.getElementById("upper").checked;
+                const has_number = document.getElementById("number").checked;
+                const has_special = document.getElementById("special").checked;
+                const symbols = generateSymbols(has_lower, has_upper, has_number, has_special);
+                const entropy = Math.floor(Math.log2(symbols.length) * length);
+                const entropy_bytes = await getEntropyBytes(length);
+
+                const key = entropy_bytes.map((index) => symbols[index % symbols.length]).join('');
+
+                document.getElementById("password").innerText = key;
+                document.getElementById("entropy").innerText = entropy + " bits";
+                document.getElementById("password-size-label").innerText = "Mida: " + length;
+            }
+
+            window.addEventListener("load", (event) => {
+                document.getElementById("generate").addEventListener("click", (event) => {
+                    generateKey();
+                });
+
+                document.getElementById("password-size").addEventListener("change", (event) => {
+                    document.getElementById("password-size-label").innerText = "Mida: " + getPasswordSize();
+                    generateKey();
+                });
+
+                const symbol_checkboxes = ["lower", "upper", "number", "special"];
+
+                for (const checkbox_id of symbol_checkboxes) {
+                    document.getElementById(checkbox_id).addEventListener("change", (event) => {
+                        if (event.currentTarget.checked) {
+                            // Checkbox has been checked: enable all
+                            symbol_checkboxes.forEach((other_checkbox_id) => document.getElementById(other_checkbox_id).removeAttribute("disabled"))
+                        } else {
+                            // Checkbox has been unchecked: disable if only another one remains
+                            const checked = symbol_checkboxes.filter((other_checkbox_id) => document.getElementById(other_checkbox_id).checked).reduce((count) => count + 1, 0);
+
+                            if (checked == 1) {
+                                symbol_checkboxes
+                                    .filter((other_checkbox_id) => document.getElementById(other_checkbox_id).checked)
+                                    .forEach((other_checkbox_id) => document.getElementById(other_checkbox_id).setAttribute("disabled", ""));
+                            }
+                        }
+
+                        generateKey();
+                    });
+                }
+
+                generateKey();
+            });
+        </script>
+    </body>
+</html>
